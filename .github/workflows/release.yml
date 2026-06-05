@@ -48,4 +48,4 @@ jobs:
           gh release create "$TAG" \
             --title "Alpha Build ${DATETIME}" \
             --notes "Automated alpha build from commit ${{ github.sha }}" \
-            "$ZIP_NAME"
+            "$ZIP_NAME" \ "To install copy zip contents to root of FAT32 media." \ "EFI should be visible when you click on the drive."
