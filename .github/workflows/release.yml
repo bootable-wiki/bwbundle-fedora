@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xz-utils dpkg-dev p7zip-full unzip python3
+          sudo apt-get install -y curl xz-utils dpkg-dev p7zip-full unzip python3 cabextract
 
       - name: Run update script
         run: |
