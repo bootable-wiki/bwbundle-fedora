@@ -9,5 +9,6 @@ EFI/boot/
 EFI/tool/
 !readme.md
 !update-efi-binaries.sh
+!LICENSE
 !LICENSES
 mt86*

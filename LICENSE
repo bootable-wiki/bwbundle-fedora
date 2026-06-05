@@ -1,0 +1,18 @@
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+BWBundle License
+
+BWBundle original scripts, configuration files, documentation, workflows, and
+project glue code are licensed under the BSD-2-Clause-Patent license.
+
+Third-party components bundled with or referenced by BWBundle are licensed
+separately by their respective copyright holders. See LICENSES for third-party
+license attributions, source references, and full license texts.
+
+Files or sections adapted from third-party GPL-licensed material remain under
+the applicable GPL license stated in LICENSES. In particular, the System
+Specifications hardware-details menuentry adapted from Ventoy's hwinfo.cfg
+remains licensed under GPL-3.0-or-later.
+
+For the full BSD-2-Clause-Patent license text, see the BSD-2-Clause-Patent
+section in LICENSES.
