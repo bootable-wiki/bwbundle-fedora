@@ -44,11 +44,9 @@ jobs:
           DATETIME="${{ steps.build.outputs.datetime }}"
           ZIP_NAME="${{ steps.build.outputs.zip_name }}"
           TAG="alpha-${DATETIME}"
+          NOTES=$'Automated alpha build from commit ${{ github.sha }}\n\nTo install copy zip contents to root of FAT32 media.\nEFI should be visible when you click on the drive.'
 
           gh release create "$TAG" \
             --title "Alpha Build ${DATETIME}" \
-            --notes "Automated alpha build from commit ${{ github.sha }}
-
-To install copy zip contents to root of FAT32 media.
-EFI should be visible when you click on the drive." \
+            --notes "$NOTES" \
             "$ZIP_NAME"
