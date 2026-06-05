@@ -1,35 +1,35 @@
 BWBundle Third-Party License Attributions
 
 Canonical Ltd.  (shim-signed, grub-efi-amd64-signed, efitools/KeyTool.efi)
-License: GPL-2.0+  (shim, efitools) / GPL-3.0  (grub)
+License: BSD-2-Clause and GPL-2.0+  (shim-signed, reflecting upstream shim
+         copyright plus signed-binary/build-chain obligations) / GPL-3.0+
+         (grub) / GPL-2.0+  (efitools/KeyTool.efi)
 Source: https://archive.ubuntu.com/ubuntu/
-Status: PRELIM — verify exact license texts with Canonical
 
 memtest86+ project  (memtest86+ binary)
-License: GPL-2.0
+License: GPL-2.0+
 Source: https://github.com/memtest86plus/memtest86plus
-Status: PRELIM — verify with upstream release
 
 netboot.xyz project  (netboot.xyz.efi)
-License: GPL-2.0
+License: GPL-2.0+  (netboot.xyz.efi binary, derived from iPXE)
 Source: https://github.com/netbootxyz/netboot.xyz
-Status: PRELIM — verify with upstream release
 
 Pete Batard / Akeo Consulting  (Rufus UEFI:NTFS — bootx64.efi, ntfs_x64.efi,
                                                                   exfat_x64.efi)
-License: GPL-3.0
+License: GPL-2.0+  (bootx64.efi, ntfs_x64.efi) / GPL-3.0+  (exfat_x64.efi)
 Source: https://github.com/pbatard/rufus
-Status: PRELIM — verify with upstream release
 
 Pete Batard / TianoCore EDK II  (UEFI Shell — shellx64.efi)
-License: BSD-2-Clause
+License: BSD-2-Clause-Patent
 Source: https://github.com/pbatard/UEFI-Shell
-Status: PRELIM — verify with upstream release
 
 Ventoy project  (GRUB system specifications snippet adapted from hwinfo.cfg)
-License: GPL-2.0+
+License: GPL-3.0+
 Source: https://github.com/ventoy/ventoy
-Status: PRELIM — verify with upstream release
+
+Microsoft Corporation  (SecureBootRecovery.efi)
+License: BSD-2-Clause-Patent
+Source: https://github.com/microsoft/mu_plus
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
@@ -1047,8 +1047,9 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
---- BSD-2-Clause -------------------------------------------------------------
+--- BSD-2-Clause-Patent ------------------------------------------------------
 
+Copyright (c) Microsoft Corporation
 Copyright (c) 2019, TianoCore and contributors.  All rights reserved.
 
 SPDX-License-Identifier: BSD-2-Clause-Patent

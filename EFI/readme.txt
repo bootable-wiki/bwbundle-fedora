@@ -1,3 +1,5 @@
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
 Layout explained
 .
 ├── boot
@@ -16,6 +18,7 @@ Layout explained
 └── ubuntu
     ├── config
     │   ├── otherlinux.cfg  for Fedora, Arch etc
+    │   ├── system-specifications.cfg  hardware-details menu from Ventoy hwinfo.cfg
     │   ├── tool.cfg        generates menu for tools binaries
     │   └── ubuntu.cfg      loads Ubuntu based distros like Mint/Elementary
     └── grub.cfg            must have it loads the others from config folder.

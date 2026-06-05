@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -44,3 +46,9 @@ curl -fsSL "https://archive.ubuntu.com/ubuntu/dists/noble/universe/binary-amd64/
 efitools=$(awk '/^Package: efitools$/{g=1} g&&/^Filename: /{print$2;exit}' "$tmp/pkgs-noble")
 curl -fL "https://archive.ubuntu.com/ubuntu/$efitools" -o "$tmp/efitools.deb"; dpkg-deb -x "$tmp/efitools.deb" "$tmp/efitools"
 cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" EFI/tool/KeyTool.efi
+
+# 8. SecureBootRecovery.efi from KB5096038 (Win11 24H2+ Safe OS Dynamic Update)
+cab_url=$(curl -fsS "https://www.catalog.update.microsoft.com/DownloadDialog.aspx" --data-urlencode 'updateIDs=[{"size":0,"updateID":"964fb9ac-f375-4e7e-8b22-b4355325ab18","uidInfo":""}]' | grep -oP "https://[^']+\.cab")
+curl -fL "$cab_url" -o "$tmp/kb5096038.cab"
+cabextract -d "$tmp/kb_sbr" "$tmp/kb5096038.cab" >/dev/null
+find "$tmp/kb_sbr" -name 'securebootrecovery.efi' -type f -exec cp {} EFI/tool/securebootrecovery.efi \;
