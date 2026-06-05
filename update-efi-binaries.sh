@@ -47,8 +47,8 @@ efitools=$(awk '/^Package: efitools$/{g=1} g&&/^Filename: /{print$2;exit}' "$tmp
 curl -fL "https://archive.ubuntu.com/ubuntu/$efitools" -o "$tmp/efitools.deb"; dpkg-deb -x "$tmp/efitools.deb" "$tmp/efitools"
 cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" EFI/tool/KeyTool.efi
 
-# 8. SecureBootRecovery.efi from KB5096038 (Win11 24H2+ Safe OS Dynamic Update)
-cab_url=$(curl -fsS "https://www.catalog.update.microsoft.com/DownloadDialog.aspx" --data-urlencode 'updateIDs=[{"size":0,"updateID":"964fb9ac-f375-4e7e-8b22-b4355325ab18","uidInfo":""}]' | grep -oP "https://[^']+\.cab")
-curl -fL "$cab_url" -o "$tmp/kb5096038.cab"
-cabextract -d "$tmp/kb_sbr" "$tmp/kb5096038.cab" >/dev/null
-find "$tmp/kb_sbr" -name 'securebootrecovery.efi' -type f -exec cp {} EFI/tool/securebootrecovery.efi \;
+# 8. SecureBootRecovery.efi from KB5063878 (Win11 24H2, build 26100.4946)
+sbr="$tmp/SecureBootRecovery.efi"
+curl -fL https://msdl.microsoft.com/download/symbols/SecureBootRecovery.efi/A867E58360000/SecureBootRecovery.efi -o "$sbr"
+echo "48dfb0cd5af49fa8528e73f3968fd944f1f41a6c58ec9e713f09610c585166bf  $sbr" | sha256sum -c -
+cp "$sbr" EFI/tool/
