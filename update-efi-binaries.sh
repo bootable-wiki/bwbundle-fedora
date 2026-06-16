@@ -52,3 +52,8 @@ sbr="$tmp/SecureBootRecovery.efi"
 curl -fL https://msdl.microsoft.com/download/symbols/SecureBootRecovery.efi/A867E58360000/SecureBootRecovery.efi -o "$sbr"
 echo "48dfb0cd5af49fa8528e73f3968fd944f1f41a6c58ec9e713f09610c585166bf  $sbr" | sha256sum -c -
 cp "$sbr" EFI/tool/
+
+# Build release zip
+export TZ=America/Los_Angeles
+DATETIME=$(date +"%Y%m%d_%H%M")
+zip -r "bwbundle_alpha_${DATETIME}.zip" . -x '.git/*' -x '.github/*' -x 'update-efi-binaries.sh' -x '.gitignore'
