@@ -65,6 +65,15 @@ jobs:
             -H "AccessKey: $BUNNY_SZ_KEY" \
             --data-binary "@${{ env.FINAL_ZIP }}"
 
+      - name: Sync to MEGA S4
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MEGA_S4_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MEGA_S4_SECRET_KEY }}
+        run: |
+          aws s3 cp "${{ env.FINAL_ZIP }}" \
+            "s3://bootable-wiki/bwbundle.zip" \
+            --endpoint-url https://s3.eu-amsterdam.megas4.com
+
       - name: Purge Bunny CDN cache
         run: |
           curl -s -o /dev/null -w "purge status: %{http_code}\n" --fail \
