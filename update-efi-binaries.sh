@@ -21,8 +21,8 @@ fetch_fedora_efi() {
 
     # Use Python to discover the RPM URL from Fedora repodata
     local rpm_url
-    rpm_url=$(python3 - "$pkg" "$FEDORA_VER" <<'PYEOF' 2>/dev/null)
-import sys, os, xml.etree.ElementTree as ET, gzip, subprocess, urllib.request
+    rpm_url=$(python3 - "$pkg" "$FEDORA_VER" <<'PYEOF' 2>/dev/null
+import sys, xml.etree.ElementTree as ET, gzip, subprocess, urllib.request
 pkg, ver = sys.argv[1], sys.argv[2]
 
 for repo_type in ('updates', 'releases'):
@@ -40,11 +40,9 @@ for repo_type in ('updates', 'releases'):
             loc = data.find(f'{{{ns}}}location')
             if loc is not None:
                 primary_href = loc.get('href')
-
     if not primary_href:
         continue
 
-    # Download primary metadata
     primary_url = f'{base}/{primary_href}'
     try:
         raw = urllib.request.urlopen(primary_url, timeout=30).read()
@@ -85,6 +83,7 @@ for repo_type in ('updates', 'releases'):
 print(f'ERROR: package {pkg} not found in Fedora {ver} repos', file=sys.stderr)
 sys.exit(1)
 PYEOF
+)
 
     [ -z "$rpm_url" ] && { echo "  FAILED" >&2; return 1; }
 
