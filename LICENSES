@@ -1,10 +1,10 @@
 BWBundle Third-Party License Attributions
 
-Canonical Ltd.  (shim-signed, grub-efi-amd64-signed, efitools/KeyTool.efi)
-License: BSD-2-Clause and GPL-2.0+  (shim-signed, reflecting upstream shim
+Red Hat, Inc. / Fedora Project  (shim-x64, grub2-efi-x64-signed, efitools/KeyTool.efi)
+License: BSD-2-Clause and GPL-2.0+  (shim-x64, reflecting upstream shim
          copyright plus signed-binary/build-chain obligations) / GPL-3.0+
          (grub) / GPL-2.0+  (efitools/KeyTool.efi)
-Source: https://archive.ubuntu.com/ubuntu/
+Source: https://koji.fedoraproject.org/koji/  (Fedora Koji build system)
 
 memtest86+ project  (memtest86+ binary)
 License: GPL-2.0+

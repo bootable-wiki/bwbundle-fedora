@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xz-utils dpkg-dev p7zip-full unzip python3
+          sudo apt-get install -y curl xz-utils p7zip-full unzip python3 zstd libarchive-tools
 
       - name: Build
         run: |
@@ -42,40 +42,14 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ]; then
             REFRESH_NAME="bwbundle_alpha-refresh_${DATETIME}.zip"
             mv "$ZIP_NAME" "$REFRESH_NAME"
-            echo "FINAL_ZIP=$REFRESH_NAME" >> $GITHUB_ENV
             gh release create "alpha-refresh-${DATETIME}" \
               --title "Monthly Alpha Build ${DATETIME}" \
               --notes $'Automated monthly refresh build from commit ${{ github.sha }}\n\nTo install copy zip contents to root of FAT32 media.\nEFI should be visible when you click on the drive.' \
               --prerelease \
               "$REFRESH_NAME"
           else
-            echo "FINAL_ZIP=$ZIP_NAME" >> $GITHUB_ENV
             gh release create "alpha-${DATETIME}" \
               --title "Alpha Build ${DATETIME}" \
               --notes $'Automated alpha build from commit ${{ github.sha }}\n\nTo install copy zip contents to root of FAT32 media.\nEFI should be visible when you click on the drive.' \
               "$ZIP_NAME"
           fi
-
-      - name: Sync to BunnyCDN
-        env:
-          BUNNY_SZ_KEY: ${{ secrets.BUNNY_SZ_KEY }}
-        run: |
-          curl -s -o /dev/null -w "%{http_code}" -X PUT \
-            "https://storage.bunnycdn.com/bootable-wiki/bwbundle.zip" \
-            -H "AccessKey: $BUNNY_SZ_KEY" \
-            --data-binary "@${{ env.FINAL_ZIP }}"
-
-      - name: Sync to MEGA S4
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.MEGA_S4_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.MEGA_S4_SECRET_KEY }}
-        run: |
-          aws s3 cp "${{ env.FINAL_ZIP }}" \
-            "s3://bootable-wiki/bwbundle.zip" \
-            --endpoint-url https://s3.eu-amsterdam.megas4.com
-
-      - name: Purge Bunny CDN cache
-        run: |
-          curl -s -o /dev/null -w "purge status: %{http_code}\n" --fail \
-            -X POST "https://api.bunny.net/purge?url=https://bootable-wiki.b-cdn.net/bwbundle.zip&async=false" \
-            -H "AccessKey: ${{ secrets.BUNNY_API_KEY }}"
