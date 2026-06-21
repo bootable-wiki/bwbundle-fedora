@@ -24,16 +24,20 @@ fetch_fedora_efi() {
     rpm_url=$(python3 - "$pkg" "$FEDORA_VER" <<'PYEOF' 2>/dev/null
 import sys, xmlrpc.client
 
-target_pkg = sys.argv[1]   # binary package name, e.g. shim-x64
+target_pkg = sys.argv[1]
 ver = sys.argv[2]
 
-# Map binary package name to source package name for Koji lookup
+# Source -> binary package name mapping for Koji
+# Fedora's signed GRUB lives in the grub2-efi-x64 subpackage, not a separate -signed one
 src_map = {
-    'shim-x64': 'shim',
-    'grub2-efi-x64-signed': 'grub2',
-    'efitools': 'efitools',
+    'shim-x64': ('shim', ['shim-x64']),
+    'grub2-efi-x64-signed': ('grub2', ['grub2-efi-x64', 'grub2-efi-x64-signed']),
+    'efitools': ('efitools', ['efitools']),
 }
-src_pkg = src_map.get(target_pkg, target_pkg)
+entry = src_map.get(target_pkg)
+if not entry:
+    sys.exit(1)
+src_pkg, binary_names = entry
 
 proxy = xmlrpc.client.ServerProxy('https://koji.fedoraproject.org/kojihub')
 
@@ -47,18 +51,19 @@ for tag in (f'f{ver}-updates', f'f{ver}'):
     build_id = result[0][0].get('build_id')
     if not build_id:
         continue
-    # List all RPMs from this build
     rpms = proxy.listBuildRPMs(build_id)
     for r in rpms:
-        if r.get('name') == target_pkg and r.get('arch') == 'x86_64':
-            nvr = r['nvr']
-            # parse version and release from NVR (name-version-release)
-            parts = nvr.split('-')
-            rel = parts[-1]
-            ver_part = parts[-2]
-            rpm_url = f'https://kojipkgs.fedoraproject.org/packages/{src_pkg}/{ver_part}/{rel}/x86_64/{nvr}.x86_64.rpm'
-            print(rpm_url)
-            sys.exit(0)
+        if r.get('arch') != 'x86_64':
+            continue
+        if r.get('name') not in binary_names:
+            continue
+        nvr = r['nvr']
+        parts = nvr.split('-')
+        rel = parts[-1]
+        ver_part = parts[-2]
+        rpm_url = f'https://kojipkgs.fedoraproject.org/packages/{src_pkg}/{ver_part}/{rel}/x86_64/{nvr}.x86_64.rpm'
+        print(rpm_url)
+        sys.exit(0)
 
 sys.exit(1)
 PYEOF
@@ -104,8 +109,9 @@ PYEOF
 fetch_fedora_efi "shim-x64" "usr/share/shim/x64/shimx64.efi" "EFI/boot/bootx64.efi"
 fetch_fedora_efi "shim-x64" "usr/share/shim/x64/mmx64.efi" "EFI/boot/mmx64.efi"
 
-# ---- 2. grub2-efi-x64-signed: grubx64.efi ----
-fetch_fedora_efi "grub2-efi-x64-signed" "usr/lib/grub/x86_64-efi-signed/grubx64.efi.signed" "EFI/boot/grubx64.efi"
+# ---- 2. grub2-efi-x64: grubx64.efi ----
+# Fedora ships the signed GRUB in the grub2-efi-x64 subpackage
+fetch_fedora_efi "grub2-efi-x64-signed" "grubx64.efi" "EFI/boot/grubx64.efi"
 
 # ---- 3. netboot.xyz.efi ----
 echo ">>> netboot.xyz"
@@ -128,8 +134,7 @@ curl -fL https://github.com/pbatard/UEFI-Shell/releases/latest/download/shellx64
 
 # ---- 7. KeyTool.efi (from Fedora's efitools) ----
 echo ">>> KeyTool.efi"
-fetch_fedora_efi "efitools" "usr/lib/efitools/x86_64-efi/KeyTool.efi" "EFI/tool/KeyTool.efi" \
-    || fetch_fedora_efi "efitools" "usr/lib64/efitools/x86_64-efi/KeyTool.efi" "EFI/tool/KeyTool.efi"
+fetch_fedora_efi "efitools" "KeyTool.efi" "EFI/tool/KeyTool.efi"
 
 # ---- 8. SecureBootRecovery.efi (from Microsoft KB5063878) ----
 echo ">>> SecureBootRecovery.efi"
