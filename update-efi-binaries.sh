@@ -19,68 +19,47 @@ fetch_fedora_efi() {
 
     echo ">>> $pkg"
 
-    # Use Python to discover the RPM URL from Fedora repodata
+    # Query Fedora Koji for the latest binary RPM URL
     local rpm_url
     rpm_url=$(python3 - "$pkg" "$FEDORA_VER" <<'PYEOF' 2>/dev/null
-import sys, xml.etree.ElementTree as ET, gzip, subprocess, urllib.request
-pkg, ver = sys.argv[1], sys.argv[2]
+import sys, xmlrpc.client
 
-for repo_type in ('updates', 'releases'):
-    base = f'https://mirrors.kernel.org/fedora/{repo_type}/{ver}/Everything/x86_64'
+target_pkg = sys.argv[1]   # binary package name, e.g. shim-x64
+ver = sys.argv[2]
+
+# Map binary package name to source package name for Koji lookup
+src_map = {
+    'shim-x64': 'shim',
+    'grub2-efi-x64-signed': 'grub2',
+    'efitools': 'efitools',
+}
+src_pkg = src_map.get(target_pkg, target_pkg)
+
+proxy = xmlrpc.client.ServerProxy('https://koji.fedoraproject.org/kojihub')
+
+for tag in (f'f{ver}-updates', f'f{ver}'):
     try:
-        repomd = urllib.request.urlopen(f'{base}/repodata/repomd.xml', timeout=30).read()
+        result = proxy.getLatestRPMS(tag, src_pkg)
     except Exception:
         continue
-
-    root = ET.fromstring(repomd)
-    ns = 'http://linux.duke.edu/metadata/repo'
-    primary_href = None
-    for data in root.findall(f'.//{{{ns}}}data'):
-        if data.get('type') == 'primary':
-            loc = data.find(f'{{{ns}}}location')
-            if loc is not None:
-                primary_href = loc.get('href')
-    if not primary_href:
+    if not result or not result[0]:
         continue
-
-    primary_url = f'{base}/{primary_href}'
-    try:
-        raw = urllib.request.urlopen(primary_url, timeout=30).read()
-    except Exception:
+    build_id = result[0][0].get('build_id')
+    if not build_id:
         continue
+    # List all RPMs from this build
+    rpms = proxy.listBuildRPMs(build_id)
+    for r in rpms:
+        if r.get('name') == target_pkg and r.get('arch') == 'x86_64':
+            nvr = r['nvr']
+            # parse version and release from NVR (name-version-release)
+            parts = nvr.split('-')
+            rel = parts[-1]
+            ver_part = parts[-2]
+            rpm_url = f'https://kojipkgs.fedoraproject.org/packages/{src_pkg}/{ver_part}/{rel}/x86_64/{nvr}.x86_64.rpm'
+            print(rpm_url)
+            sys.exit(0)
 
-    if primary_href.endswith('.gz'):
-        xml_data = gzip.decompress(raw)
-    elif primary_href.endswith('.zst'):
-        proc = subprocess.run(['zstd', '-d', '-q'], input=raw, capture_output=True)
-        xml_data = proc.stdout
-        if proc.returncode != 0:
-            continue
-    elif primary_href.endswith('.xz'):
-        proc = subprocess.run(['xz', '-d', '-q'], input=raw, capture_output=True)
-        xml_data = proc.stdout
-        if proc.returncode != 0:
-            continue
-    else:
-        continue
-
-    root2 = ET.fromstring(xml_data)
-    for pkg_el in root2.findall(f'.//{{{ns}}}package'):
-        name_el = pkg_el.find(f'{{{ns}}}name')
-        if name_el is None or name_el.text != pkg:
-            continue
-        if pkg_el.get('arch') not in ('x86_64', 'noarch'):
-            continue
-        loc = pkg_el.find(f'{{{ns}}}location')
-        if loc is None:
-            continue
-        href = loc.get('href', '')
-        if not href:
-            continue
-        print(f'https://mirrors.kernel.org/fedora/{href}')
-        sys.exit(0)
-
-print(f'ERROR: package {pkg} not found in Fedora {ver} repos', file=sys.stderr)
 sys.exit(1)
 PYEOF
 )
