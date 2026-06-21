@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xz-utils p7zip-full unzip python3 zstd libarchive-tools
+          sudo apt-get install -y curl xz-utils p7zip-full unzip python3 zstd libarchive-tools dpkg-dev
 
       - name: Build
         run: |

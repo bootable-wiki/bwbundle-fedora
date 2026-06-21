@@ -132,9 +132,13 @@ curl -fL https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-nt
 echo ">>> UEFI Shell"
 curl -fL https://github.com/pbatard/UEFI-Shell/releases/latest/download/shellx64.efi -o EFI/tool/shellx64.efi
 
-# ---- 7. KeyTool.efi (from Fedora's efitools) ----
+# ---- 7. KeyTool.efi (from Ubuntu Noble efitools; Fedora's efitools doesn't ship the EFI binary) ----
 echo ">>> KeyTool.efi"
-fetch_fedora_efi "efitools" "KeyTool.efi" "EFI/tool/KeyTool.efi"
+curl -fsSL "https://archive.ubuntu.com/ubuntu/dists/noble/universe/binary-amd64/Packages.xz" | xz -d > "$tmp/pkgs-noble"
+efitools=$(awk '/^Package: efitools$/{g=1} g&&/^Filename: /{print$2;exit}' "$tmp/pkgs-noble")
+curl -fL "https://archive.ubuntu.com/ubuntu/$efitools" -o "$tmp/efitools.deb"
+dpkg-deb -x "$tmp/efitools.deb" "$tmp/efitools"
+cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" EFI/tool/KeyTool.efi
 
 # ---- 8. SecureBootRecovery.efi (from Microsoft KB5063878) ----
 echo ">>> SecureBootRecovery.efi"
