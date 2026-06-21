@@ -10,7 +10,10 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 # ---- Fedora release to track (overridable) ----
-FEDORA_VER="${FEDORA_VER:-44}"
+# The shim must include Microsoft CA 2023.  Fedora 45+ has this; older
+# releases ship a shim signed only with the 2011 CA.  You can override
+# via the FEDORA_VER environment variable.
+FEDORA_VER="${FEDORA_VER:-45}"
 
 # ---- Helper: download a signed EFI binary from Fedora's repos ----
 # Usage: fetch_fedora_efi <rpm-name> <path-inside-rpm> <destination>
@@ -19,20 +22,20 @@ fetch_fedora_efi() {
 
     echo ">>> $pkg"
 
-    # Query Fedora Koji for the latest binary RPM URL
+    # Query Fedora Koji for the latest binary RPM URL.
+    # Tries multiple Fedora releases so that even if FEDORA_VER points to
+    # an older release, we can grab the shim from a newer one (needed for
+    # Microsoft CA 2023 support).
     local rpm_url
     rpm_url=$(python3 - "$pkg" "$FEDORA_VER" <<'PYEOF' 2>/dev/null
 import sys, xmlrpc.client
 
-target_pkg = sys.argv[1]
-ver = sys.argv[2]
+target_pkg, ver = sys.argv[1], sys.argv[2]
 
-# Source -> binary package name mapping for Koji
-# Fedora's signed GRUB lives in the grub2-efi-x64 subpackage, not a separate -signed one
 src_map = {
-    'shim-x64': ('shim', ['shim-x64']),
-    'grub2-efi-x64-signed': ('grub2', ['grub2-efi-x64', 'grub2-efi-x64-signed']),
-    'efitools': ('efitools', ['efitools']),
+    'shim-x64':                 ('shim',   ['shim-x64']),
+    'grub2-efi-x64-signed':     ('grub2',  ['grub2-efi-x64', 'grub2-efi-x64-signed']),
+    'efitools':                 ('efitools', ['efitools']),
 }
 entry = src_map.get(target_pkg)
 if not entry:
@@ -41,29 +44,31 @@ src_pkg, binary_names = entry
 
 proxy = xmlrpc.client.ServerProxy('https://koji.fedoraproject.org/kojihub')
 
-for tag in (f'f{ver}-updates', f'f{ver}'):
-    try:
-        result = proxy.getLatestRPMS(tag, src_pkg)
-    except Exception:
-        continue
-    if not result or not result[0]:
-        continue
-    build_id = result[0][0].get('build_id')
-    if not build_id:
-        continue
-    rpms = proxy.listBuildRPMs(build_id)
-    for r in rpms:
-        if r.get('arch') != 'x86_64':
+# Try the configured version, then newer releases
+for v in (int(ver), int(ver)+1, int(ver)+2):
+    for tag in (f'f{v}-updates', f'f{v}'):
+        try:
+            result = proxy.getLatestRPMS(tag, src_pkg)
+        except Exception:
             continue
-        if r.get('name') not in binary_names:
+        if not result or not result[0]:
             continue
-        nvr = r['nvr']
-        parts = nvr.split('-')
-        rel = parts[-1]
-        ver_part = parts[-2]
-        rpm_url = f'https://kojipkgs.fedoraproject.org/packages/{src_pkg}/{ver_part}/{rel}/x86_64/{nvr}.x86_64.rpm'
-        print(rpm_url)
-        sys.exit(0)
+        build_id = result[0][0].get('build_id')
+        if not build_id:
+            continue
+        rpms = proxy.listBuildRPMs(build_id)
+        for r in rpms:
+            if r.get('arch') != 'x86_64':
+                continue
+            if r.get('name') not in binary_names:
+                continue
+            nvr = r['nvr']
+            parts = nvr.split('-')
+            rel = parts[-1]
+            ver_part = parts[-2]
+            rpm_url = f'https://kojipkgs.fedoraproject.org/packages/{src_pkg}/{ver_part}/{rel}/x86_64/{nvr}.x86_64.rpm'
+            print(rpm_url)
+            sys.exit(0)
 
 sys.exit(1)
 PYEOF
