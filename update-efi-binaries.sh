@@ -145,6 +145,26 @@ curl -fL "https://archive.ubuntu.com/ubuntu/$efitools" -o "$tmp/efitools.deb"
 dpkg-deb -x "$tmp/efitools.deb" "$tmp/efitools"
 cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" EFI/tool/KeyTool.efi
 
+# ---- 9. Secure Boot 2023 certificate updates (signed ESLs for KeyTool) ----
+# These Microsoft-signed ESL packages can be loaded via KeyTool.efi (Edit DB → Load)
+# to add the 2023 DB certificates without needing Setup Mode.
+# Note: KEK 2023 updates are OEM PK-signed so not included here.
+echo ">>> Secure Boot 2023 certificate packages"
+mkdir -p EFI/tool/certificates
+BASE="https://github.com/microsoft/secureboot_objects/raw/main/PostSignedObjects"
+
+# DB updates (3x 2023 certificates)
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"   -o EFI/tool/certificates/DBUpdate2024.bin
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o EFI/tool/certificates/DBUpdate3P2023.bin
+curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o EFI/tool/certificates/DBUpdateOROM2023.bin
+
+# DBX updates (revoke 2011 + SVN)
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin" -o EFI/tool/certificates/DBXUpdate2024.bin
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"  -o EFI/tool/certificates/DBXUpdateSVN.bin
+
+# Standard DBX (current revocation list)
+curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"              -o EFI/tool/certificates/DBXUpdate.bin
+
 # ---- 8. SecureBootRecovery.efi (from Microsoft KB5063878) ----
 echo ">>> SecureBootRecovery.efi"
 sbr="$tmp/SecureBootRecovery.efi"
@@ -155,6 +175,6 @@ cp "$sbr" EFI/tool/
 # ---- Build release zip ----
 export TZ=America/Los_Angeles
 DATETIME=$(date +"%Y%m%d_%H%M")
-VERSION="bwbundle_alpha_${DATETIME}"
+VERSION="bwbundle-fedora-alpha_${DATETIME}"
 echo "$VERSION" > version.txt
 zip -r "${VERSION}.zip" . -x '.git/*' -x '.github/*' -x 'update-efi-binaries.sh' -x '.gitignore'

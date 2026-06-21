@@ -12,6 +12,13 @@ Layout explained
 │   ├── exfat_x64.efi
 │   └── ntfs_x64.efi
 ├── tool
+│   ├── certificates
+│   │   ├── DBUpdate2024.bin     [DB] Windows UEFI CA 2023 (signed ESL)
+│   │   ├── DBUpdate3P2023.bin   [DB] Microsoft UEFI CA 2023 (signed ESL)
+│   │   ├── DBUpdateOROM2023.bin [DB] Option ROM UEFI CA 2023 (signed ESL)
+│   │   ├── DBXUpdate.bin        [DBX] Standard revocation list
+│   │   ├── DBXUpdate2024.bin    [DBX] Revoke Windows Production PCA 2011
+│   │   └── DBXUpdateSVN.bin     [DBX] Bootmgr SVN update
 │   ├── KeyTool.efi         advanced secure boot management from Fedora (efitools)
 │   ├── netboot.xyz.efi     ethernet based bootloader from netboot.xyz team
 │   ├── SecureBootRecovery.efi verify & install the Microsoft UEFI CA 2023
