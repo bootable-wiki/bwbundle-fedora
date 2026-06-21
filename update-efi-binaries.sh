@@ -83,11 +83,17 @@ PYEOF
     fi
 
     # Locate the desired file inside the extracted tree
+    local target_file="${src_path##*/}"
     found=$(find "$edir" -path "*/${src_path}" -type f 2>/dev/null | head -1)
     if [ -z "$found" ]; then
-        echo "  WARNING: ${src_path} not found in $pkg, searching..."
-        found=$(find "$edir" -name "*.efi" -type f 2>/dev/null | head -5)
-        echo "  Available EFI files: $found"
+        found=$(find "$edir" -name "$target_file" -type f 2>/dev/null | head -1)
+    fi
+    if [ -z "$found" ]; then
+        echo "  WARNING: ${src_path}/${target_file} not found, searching for any .efi..."
+        found=$(find "$edir" -name "*.efi" -type f 2>/dev/null | head -1)
+    fi
+    if [ -z "$found" ]; then
+        echo "  ERROR: no EFI binary found in $pkg RPM" >&2
         return 1
     fi
     cp "$found" "$dst"
