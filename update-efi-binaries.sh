@@ -154,16 +154,16 @@ mkdir -p EFI/tool/certificates/db EFI/tool/certificates/dbx
 BASE="https://github.com/microsoft/secureboot_objects/raw/main/PostSignedObjects"
 
 # DB updates (3x 2023 certificates)
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o EFI/tool/certificates/db/DBUpdate2024.bin
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o EFI/tool/certificates/db/DBUpdate3P2023.bin
-curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o EFI/tool/certificates/db/DBUpdateOROM2023.bin
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o EFI/tool/certificates/db/DBUpdate2024.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o EFI/tool/certificates/db/DBUpdate3P2023.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o EFI/tool/certificates/db/DBUpdateOROM2023.auth
 
 # DBX updates (revoke 2011 + SVN)
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o EFI/tool/certificates/dbx/DBXUpdate2024.bin
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o EFI/tool/certificates/dbx/DBXUpdateSVN.bin
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o EFI/tool/certificates/dbx/DBXUpdate2024.auth
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o EFI/tool/certificates/dbx/DBXUpdateSVN.auth
 
 # Standard DBX (current revocation list)
-curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o EFI/tool/certificates/dbx/DBXUpdate.bin
+curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o EFI/tool/certificates/dbx/DBXUpdate.auth
 
 # ---- 8. SecureBootRecovery.efi (from Microsoft KB5063878) ----
 echo ">>> SecureBootRecovery.efi"
