@@ -1,35 +1,21 @@
 BWBundle Third-Party License Attributions
 
-Red Hat, Inc. / Fedora Project  (shim-x64, grub2-efi-x64-signed, efitools/KeyTool.efi)
+Red Hat, Inc. / Fedora Project  (shim-x64, bootx64.efi, mmx64.efi)
 License: BSD-2-Clause and GPL-2.0+  (shim-x64, reflecting upstream shim
-         copyright plus signed-binary/build-chain obligations) / GPL-3.0+
-         (grub) / GPL-2.0+  (efitools/KeyTool.efi)
+         copyright plus signed-binary/build-chain obligations)
 Source: https://koji.fedoraproject.org/koji/  (Fedora Koji build system)
 
-memtest86+ project  (memtest86+ binary)
-License: GPL-2.0+
-Source: https://github.com/memtest86plus/memtest86plus
-
-netboot.xyz project  (netboot.xyz.efi)
-License: GPL-2.0+  (netboot.xyz.efi binary, derived from iPXE)
-Source: https://github.com/netbootxyz/netboot.xyz
-
-Pete Batard / Akeo Consulting  (Rufus UEFI:NTFS — bootx64.efi, ntfs_x64.efi,
-                                                                  exfat_x64.efi)
-License: GPL-2.0+  (bootx64.efi, ntfs_x64.efi) / GPL-3.0+  (exfat_x64.efi)
-Source: https://github.com/pbatard/rufus
-
-Pete Batard / TianoCore EDK II  (UEFI Shell — shellx64.efi)
-License: BSD-2-Clause-Patent
-Source: https://github.com/pbatard/UEFI-Shell
-
-Ventoy project  (GRUB system specifications snippet adapted from hwinfo.cfg)
+Red Hat, Inc. / Fedora Project  (grub2-efi-x64-signed, grubx64.efi)
 License: GPL-3.0+
-Source: https://github.com/ventoy/ventoy
+Source: https://koji.fedoraproject.org/koji/  (Fedora Koji build system)
 
-Microsoft Corporation  (SecureBootRecovery.efi)
+Canonical Ltd. / Ubuntu  (efitools, KeyTool.efi)
+License: GPL-2.0+
+Source: https://archive.ubuntu.com/ubuntu/dists/noble/universe/binary-amd64/
+
+Microsoft Corporation  (secureboot_objects, signed .auth certificate packages)
 License: BSD-2-Clause-Patent
-Source: https://github.com/microsoft/mu_plus
+Source: https://github.com/microsoft/secureboot_objects
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991

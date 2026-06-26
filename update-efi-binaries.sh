@@ -4,7 +4,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-mkdir -p EFI/boot EFI/tool EFI/Rufus
+mkdir -p EFI/boot
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -118,61 +118,35 @@ fetch_fedora_efi "shim-x64" "usr/share/shim/x64/mmx64.efi" "EFI/boot/mmx64.efi"
 # Fedora ships the signed GRUB in the grub2-efi-x64 subpackage
 fetch_fedora_efi "grub2-efi-x64-signed" "grubx64.efi" "EFI/boot/grubx64.efi"
 
-# ---- 3. netboot.xyz.efi ----
-echo ">>> netboot.xyz"
-curl -fL https://boot.netboot.xyz/ipxe/netboot.xyz.efi -o EFI/tool/netboot.xyz.efi
-
-# ---- 4. memtest86+ ----
-echo ">>> memtest86+"
-ver=$(curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} https://api.github.com/repos/memtest86plus/memtest86plus/releases/latest | python3 -c 'import sys,json;print(json.load(sys.stdin)["tag_name"])')
-curl -fL "https://memtest.org/download/$ver/mt86plus_${ver#v}.binaries.zip" -o "$tmp/m.zip"
-unzip -o "$tmp/m.zip" '*x86_64*' -d .
-
-# ---- 5. Rufus UEFI:NTFS ----
-echo ">>> Rufus UEFI:NTFS"
-curl -fL https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img -o "$tmp/r.img"
-7z e -y -oEFI/Rufus "$tmp/r.img" EFI/Boot/bootx64.efi EFI/Rufus/ntfs_x64.efi EFI/Rufus/exfat_x64.efi >/dev/null
-
-# ---- 6. UEFI Shell ----
-echo ">>> UEFI Shell"
-curl -fL https://github.com/pbatard/UEFI-Shell/releases/latest/download/shellx64.efi -o EFI/tool/shellx64.efi
-
-# ---- 7. KeyTool.efi (from Ubuntu Noble efitools; Fedora's efitools doesn't ship the EFI binary) ----
+# ---- 3. KeyTool.efi (from Ubuntu Noble efitools; Fedora's efitools doesn't ship the EFI binary) ----
 echo ">>> KeyTool.efi"
 curl -fsSL "https://archive.ubuntu.com/ubuntu/dists/noble/universe/binary-amd64/Packages.xz" | xz -d > "$tmp/pkgs-noble"
 efitools=$(awk '/^Package: efitools$/{g=1} g&&/^Filename: /{print$2;exit}' "$tmp/pkgs-noble")
 curl -fL "https://archive.ubuntu.com/ubuntu/$efitools" -o "$tmp/efitools.deb"
 dpkg-deb -x "$tmp/efitools.deb" "$tmp/efitools"
-cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" EFI/tool/KeyTool.efi
+cp "$tmp/efitools/usr/lib/efitools/x86_64-linux-gnu/KeyTool.efi" KeyTool.efi
 
-# ---- 8. Secure Boot 2023 certificate updates (signed ESLs for KeyTool) ----
+# ---- 4. Secure Boot 2023 certificate updates (signed ESLs for KeyTool) ----
 # These Microsoft-signed ESL packages can be loaded via KeyTool.efi (Edit DB → Load)
 # to add the 2023 DB certificates without needing Setup Mode.
 # Note: KEK 2023 updates are OEM PK-signed so not included here.
 echo ">>> Secure Boot 2023 certificate packages"
-mkdir -p EFI/tool/certificates/db EFI/tool/certificates/dbx
+mkdir -p certs/db certs/dbx
 BASE="https://github.com/microsoft/secureboot_objects/raw/main/PostSignedObjects"
 
 # DB updates (3x 2023 certificates)
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o EFI/tool/certificates/db/DBUpdate2024.auth
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o EFI/tool/certificates/db/DBUpdate3P2023.auth
-curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o EFI/tool/certificates/db/DBUpdateOROM2023.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o certs/db/DBUpdate2024.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o certs/db/DBUpdate3P2023.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o certs/db/DBUpdateOROM2023.auth
 
 # DBX updates (revoke 2011 + SVN)
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o EFI/tool/certificates/dbx/DBXUpdate2024.auth
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o EFI/tool/certificates/dbx/DBXUpdateSVN.auth
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o certs/dbx/DBXUpdate2024.auth
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o certs/dbx/DBXUpdateSVN.auth
 
 # Standard DBX (current revocation list)
-curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o EFI/tool/certificates/dbx/DBXUpdate.auth
+curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o certs/dbx/DBXUpdate.auth
 
-# ---- 8. SecureBootRecovery.efi (from Microsoft KB5063878) ----
-echo ">>> SecureBootRecovery.efi"
-sbr="$tmp/SecureBootRecovery.efi"
-curl -fL https://msdl.microsoft.com/download/symbols/SecureBootRecovery.efi/A867E58360000/SecureBootRecovery.efi -o "$sbr"
-echo "48dfb0cd5af49fa8528e73f3968fd944f1f41a6c58ec9e713f09610c585166bf  $sbr" | sha256sum -c -
-cp "$sbr" EFI/tool/
-
-# ---- Build release zip ----
+# ---- 5. Build release zip ----
 export TZ=America/Los_Angeles
 DATETIME=$(date +"%Y%m%d_%H%M")
 VERSION="bwbundle-fedora-alpha_${DATETIME}"

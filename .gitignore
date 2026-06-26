@@ -4,11 +4,11 @@
 !.github/**
 !EFI/
 !EFI/**
-EFI/Rufus/
 EFI/boot/
-EFI/tool/
+!certs/
+!certs/readme.txt
+!usage.txt
 !readme.md
 !update-efi-binaries.sh
 !LICENSE
 !LICENSES
-mt86*

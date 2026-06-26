@@ -1,0 +1,22 @@
+=== Secure Boot Certificate Enrollment Guide ===
+
+Step 1 - Enroll hashes with MokManager
+  - Select "mmx64.efi MokManager" from the GRUB menu
+  - Choose "Enroll hash from disk"
+  - Navigate to and select the .efi binary you want (e.g. KeyTool.efi)
+  - Confirm enrollment and reboot
+
+Step 2 - Add certificates with KeyTool
+  - Select "KeyTool.efi" from the GRUB menu
+  - Choose "Edit Keys" or "Edit DB" / "Edit DBX"
+  - Select "Add New Key"
+  - Navigate to /certs/db/ or /certs/dbx/ and select the .auth file
+  - Confirm and reboot
+
+Available certificate files (see certs/readme.txt for details):
+  /certs/db/DBUpdate2024.auth       - Windows UEFI CA 2023
+  /certs/db/DBUpdate3P2023.auth     - Microsoft UEFI CA 2023 (for shim/Linux)
+  /certs/db/DBUpdateOROM2023.auth   - Option ROM UEFI CA 2023
+  /certs/dbx/DBXUpdate.auth         - Standard revocation list
+  /certs/dbx/DBXUpdateSVN.auth      - Bootmgr SVN update (optional)
+  /certs/dbx/DBXUpdate2024.auth     - Revoke Windows Production PCA 2011
