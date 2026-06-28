@@ -28,7 +28,7 @@ jobs:
           chmod +x update-efi-binaries.sh
           ./update-efi-binaries.sh
 
-          ZIP_NAME=$(ls bwbundle-fedora-alpha_*.zip)
+          ZIP_NAME=$(ls bwbundle_fedora_alpha_*.zip)
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
           DATETIME=${ZIP_NAME#bwbundle-fedora-alpha_}
@@ -42,7 +42,7 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ]; then
             REFRESH_NAME="bwbundle-fedora-alpha-refresh_${DATETIME}.zip"
             mv "$ZIP_NAME" "$REFRESH_NAME"
-            gh release create "fedora-alpha-refresh-${DATETIME}" \
+            gh release create "fedora_alpha_refresh-${DATETIME}" \
               --title "Fedora Alpha Build ${DATETIME}" \
               --notes $'Automated monthly refresh build from commit ${{ github.sha }}\n\nTo install copy zip contents to root of FAT32 media.\nEFI should be visible when you click on the drive.' \
               --prerelease \
