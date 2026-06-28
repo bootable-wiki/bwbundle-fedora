@@ -14,9 +14,9 @@ Step 2 - Add certificates with KeyTool
   - Confirm and reboot
 
 Available certificate files (see certs/readme.txt for details):
-  /certs/db/DBUpdate2024.auth       - Windows UEFI CA 2023
-  /certs/db/DBUpdate3P2023.auth     - Microsoft UEFI CA 2023 (for shim/Linux)
-  /certs/db/DBUpdateOROM2023.auth   - Option ROM UEFI CA 2023
-  /certs/dbx/DBXUpdate.auth         - Standard revocation list
-  /certs/dbx/DBXUpdateSVN.auth      - Bootmgr SVN update (optional)
-  /certs/dbx/DBXUpdate2024.auth     - Revoke Windows Production PCA 2011
+  /certs/db/1DBUpdate2024.auth       - Windows UEFI CA 2023
+  /certs/db/2DBUpdate3P2023.auth     - Microsoft UEFI CA 2023 (for shim/Linux)
+  /certs/db/3DBUpdateOROM2023.auth   - Option ROM UEFI CA 2023
+  /certs/dbx/4DBXUpdate.auth         - Standard revocation list
+  /certs/dbx/5DBXUpdateSVN.auth      - Bootmgr SVN update (optional)
+  /certs/dbx/6DBXUpdate2024.auth     - Revoke Windows Production PCA 2011

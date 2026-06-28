@@ -135,20 +135,20 @@ mkdir -p certs/db certs/dbx
 BASE="https://github.com/microsoft/secureboot_objects/raw/main/PostSignedObjects"
 
 # DB updates (3x 2023 certificates)
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o certs/db/DBUpdate2024.auth
-curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o certs/db/DBUpdate3P2023.auth
-curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o certs/db/DBUpdateOROM2023.auth
-
-# DBX updates (revoke 2011 + SVN)
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o certs/dbx/DBXUpdate2024.auth
-curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o certs/dbx/DBXUpdateSVN.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate2024.bin"    -o certs/db/1DBUpdate2024.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdate3P2023.bin"  -o certs/db/2DBUpdate3P2023.auth
+curl -fL "$BASE/Optional/DB/amd64/DBUpdateOROM2023.bin" -o certs/db/3DBUpdateOROM2023.auth
 
 # Standard DBX (current revocation list)
-curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o certs/dbx/DBXUpdate.auth
+curl -fL "$BASE/DBX/amd64/DBXUpdate.bin"               -o certs/dbx/4DBXUpdate.auth
+
+# DBX updates (revoke 2011 + SVN)
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdateSVN.bin"   -o certs/dbx/5DBXUpdateSVN.auth
+curl -fL "$BASE/Optional/DBX/amd64/DBXUpdate2024.bin"  -o certs/dbx/6DBXUpdate2024.auth
 
 # ---- 5. Build release zip ----
 export TZ=America/Los_Angeles
 DATETIME=$(date +"%Y%m%d_%H%M")
-VERSION="bwbundle-fedora-alpha_${DATETIME}"
+VERSION="bwbundle_fedora_alpha_${DATETIME}"
 echo "$VERSION" > version.txt
 zip -r "${VERSION}.zip" . -x '.git/*' -x '.github/*' -x 'update-efi-binaries.sh' -x '.gitignore'
